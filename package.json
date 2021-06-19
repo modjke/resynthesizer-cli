@@ -1,0 +1,22 @@
+{
+  "name": "resynthesizer-cli",
+  "version": "1.0.0",
+  "description": "Original code: https://github.com/bootchk/resynthesizer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modjke/resynthesizer-cli.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modjke/resynthesizer-cli/issues"
+  },
+  "homepage": "https://github.com/modjke/resynthesizer-cli#readme",
+  "dependencies": {
+    "sharp": "^0.28.3"
+  }
+}

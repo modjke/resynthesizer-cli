@@ -2,6 +2,9 @@
 #include <stdio.h>	// printf
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "glibProxy.h"
 #include "map.h"
@@ -13,19 +16,27 @@ void voidProgressCallback(int time, void* some) {}
 int main()
 {
 
-	int width;
-	int height;
+	int width = 600;
+	int height = 400;
 
-	read(0, &width, sizeof(width));
-	read(0, &height, sizeof(height));
+	// read(0, &width, sizeof(width));
+	// read(0, &height, sizeof(height));
 
 	int imageLength = 3 * width * height;
 	int maskLength = width * height;
 
 	unsigned char *image = malloc(imageLength);
-	read(0, image, imageLength);
+	int imageFile = open("image.bin", O_RDONLY);
+	if (read(imageFile, image, imageLength) != imageLength) {		
+		return 1;
+	}
+	close(imageFile);
 	unsigned char *mask = malloc(maskLength);
-	read(0, mask, maskLength);
+	int maskFile = open("mask.bin", O_RDONLY);	
+	if (read(maskFile, mask, maskLength) != maskLength) {		
+		return 1;
+	}
+	close(maskFile);
 
 	
 
@@ -41,14 +52,16 @@ int main()
 	maskBuffer->height = height;
 	maskBuffer->rowBytes = width;
 
+	TImageSynthParameters parameters;
+	setDefaultParams(&parameters);
 	
-	//int status;
-	// int error = imageSynth(imageBuffer, maskBuffer, T_RGB, NULL, voidProgressCallback, NULL, &status);
+	int cancel = 0;
+	int error = imageSynth(imageBuffer, maskBuffer, T_RGB, &parameters, voidProgressCallback, (void *) 0, &cancel);
 
-	//if (error == 0) {
-	//	write(1, image, imageLength);
-	//}
-	write(1, image, imageLength);
+	if (error == 0) {
+		write(1, image, imageLength);
+	}
+
 
 	return 0;
 }

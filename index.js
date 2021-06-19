@@ -10,6 +10,7 @@ void async function main() {
 
     const { data: imageBuffer, info: imageInfo } = await sharp(image)
         .removeAlpha()
+        .raw()
         .toBuffer({ resolveWithObject: true })
 
     if (imageInfo.channels !== 3) {
@@ -17,36 +18,47 @@ void async function main() {
     }
 
     const mask = 'mask.png'
-    const { data: maskBuffer, info: maskInfo } = await sharp(mask).toColorspace('b-w').toBuffer({ resolveWithObject: true })
+    const { data: maskBuffer, info: maskInfo } = await sharp(mask)
+        .toColorspace('b-w')
+        .raw()
+        .toBuffer({ resolveWithObject: true })
+
+    
 
     if (maskInfo.width !== imageInfo.width || maskInfo.height !== imageInfo.height) {
         throw new Error(`Invalid mask dimensions`)
     }
 
+    fs.writeFileSync('image.bin', imageBuffer, 'binary')
+    fs.writeFileSync('mask.bin', maskBuffer, 'binary')
+    
+    const outputBuffer = fs.readFileSync('output.bin')
+    
+    await sharp(outputBuffer, { raw: { channels: 3, width: imageInfo.width, height: imageInfo.height }})        
+        .toFile('output.png')
+
+    return
+
+
     const cli = spawn('./cli')
     cli.stdin.setDefaultEncoding('binary')
-    const output = new BufferWritable(imageInfo.width * imageInfo.height * 3)
-    cli.stdout.pipe(output)
-    output.once('finish', () => {
-        sharp(output.buffer, { raw: {
-            channels: 3,
-            width: imageInfo.width,
-            height: imageInfo.height
-        }}).toFile('output.png')
-    })
+    //const output = new BufferWritable(imageInfo.width * imageInfo.height * 3)
+    cli.stdout.pipe(fs.createWriteStream('output.bin', { encoding: 'binary' }))
+    
+    
 
     const write = promisify(cli.stdin.write).bind(cli.stdin)
 
     const buffer = Buffer.alloc(4)
     buffer.writeInt32LE(imageInfo.width)
-    await write(buffer, 'binary')
+    await write(buffer)
 
     buffer.byteOffset = 0
     buffer.writeInt32LE(imageInfo.height)
-    await write(buffer, 'binary')    
+    await write(buffer)    
 
-    await write(imageBuffer, 'binary')
-    await write(maskBuffer, 'binary')
+    await write(imageBuffer)
+    await write(maskBuffer)
 
     
 }()

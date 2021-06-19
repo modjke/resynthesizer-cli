@@ -89,11 +89,11 @@ int main(
 		0,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,	// 3*RGBA and 2 trailing pad byte = 14
 		0,0,0,0, 1,1,1,1, 0,0,0,0, 0,0,
 		0,0,0,0, 0,0,0,0, 0,0,0,8, 0,0
-		};
+	};
 		
 	unsigned char mask[12] = {
 		0,0,		0, 0, 	// 3*mask and trailing pad byte = 4
-		0,0xFF,	0, 0,	// 0xFF == totally selected
+		0,0xFF,	    0, 0,	// 0xFF == totally selected
 		0,0,		0, 0
 		};
 	

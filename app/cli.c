@@ -16,29 +16,35 @@ void voidProgressCallback(int time, void* some) {}
 int main()
 {
 
-	int width = 600;
-	int height = 400;
+	int width;
+	int height;
 
-	// read(0, &width, sizeof(width));
-	// read(0, &height, sizeof(height));
+	read(0, &width, sizeof(width));
+	read(0, &height, sizeof(height));
 
 	int imageLength = 3 * width * height;
 	int maskLength = width * height;
 
 	unsigned char *image = malloc(imageLength);
-	int imageFile = open("image.bin", O_RDONLY);
-	if (read(imageFile, image, imageLength) != imageLength) {		
-		return 1;
-	}
-	close(imageFile);
-	unsigned char *mask = malloc(maskLength);
-	int maskFile = open("mask.bin", O_RDONLY);	
-	if (read(maskFile, mask, maskLength) != maskLength) {		
-		return 1;
-	}
-	close(maskFile);
+	int bytesTotal = 0;
+	int bytes = 0;
 
+	while (bytesTotal < imageLength) {
+		unsigned char *imagePtr = image;
+		imagePtr += bytesTotal;
+		bytes = read(0, imagePtr, imageLength - bytesTotal);
+		bytesTotal += bytes;
+	}
 	
+	unsigned char *mask = malloc(maskLength);	
+	bytesTotal = 0;
+	bytes = 0;	
+	while (bytesTotal < maskLength) {
+		unsigned char *maskPtr = mask;
+		maskPtr += bytesTotal;
+		bytes = read(0, maskPtr, maskLength - bytesTotal);
+		bytesTotal += bytes;
+	}
 
 	ImageBuffer *imageBuffer = malloc(sizeof(ImageBuffer));
 	imageBuffer->data = image;
